@@ -1,0 +1,10 @@
+[
+    {
+        "uid": "123456789",
+        "password": "password1"
+    },
+    {
+        "uid": "987654321",
+        "password": "password2"
+    }
+]
