@@ -16,9 +16,11 @@ import time
 import os
 
 app = Flask(__name__)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Define your API key here (you can load it from env variables for security)
-API_KEY = "ADD_YOUR_KEY"
+# Use a deployment secret when available while keeping the requested local
+# default for deployments that do not define API_KEY.
+API_KEY = os.environ.get("API_KEY", "BALAK")
 
 # Refresh every 8 hours
 JWT_REFRESH_INTERVAL = 8 * 60 * 60  # 28800 seconds
@@ -101,6 +103,8 @@ def load_tokens(server_name, for_visit=False):
         else:
             path = "token_bd.json"
 
+    path = os.path.join(BASE_DIR, path)
+
     try:
         with open(path, "r") as f:
             tokens = json.load(f)
@@ -145,8 +149,19 @@ def generate_jwt(uid, password):
 
 
 def process_account_file(account_file, token_file):
+    account_path = (
+        account_file
+        if os.path.isabs(account_file)
+        else os.path.join(BASE_DIR, account_file)
+    )
+    token_path = (
+        token_file
+        if os.path.isabs(token_file)
+        else os.path.join(BASE_DIR, token_file)
+    )
+
     try:
-        with open(account_file, "r", encoding="utf-8") as f:
+        with open(account_path, "r", encoding="utf-8") as f:
             accounts = json.load(f)
 
     except Exception as e:
@@ -175,7 +190,7 @@ def process_account_file(account_file, token_file):
             print(f"Generated token for UID {uid}")
 
     try:
-        with open(token_file, "w", encoding="utf-8") as f:
+        with open(token_path, "w", encoding="utf-8") as f:
             json.dump(
                 generated_tokens,
                 f,
